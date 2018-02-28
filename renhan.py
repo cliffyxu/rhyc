@@ -1,14 +1,22 @@
 taipei = open(r"C:\Data\xuc\Python\taipei.alma", "r")
 number_lines = 0
 dictionary = {}
+
 while True:
-    global number_lines, dictionary
     line = taipei.readline()
     if not line:
         break
-    line1 = line.split()
-    print line1
+    a = line.find("EQ")
+    b = line.find(" ", a + 3)
+    eq = line[a + 3:b]
+    #dictionary.update({eq : None})
+    fmt = ""
+    c = line.find("FMT")
+    d = line.find('"', c + 5) 
+    fmt = line[c + 5:d]
+    dictionary[eq] = fmt
     number_lines += 1
+        
 print number_lines
 print dictionary
 taipei.close()
