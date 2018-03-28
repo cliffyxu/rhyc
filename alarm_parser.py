@@ -75,29 +75,46 @@ def compare(om, fmt):
 
 count = 0
 bad_act_alarm_count = 0
-alarm_dict={}
-with open('C:/Data/xuc/python/taipei.alma') as alarm_file:
-    for alarm in alarm_file.readlines():
-        fmt_index = alarm.find("FMT")
-        fmt_index_end = alarm.find("\"", fmt_index + 6)
-        
-        eq_index = alarm.find("EQ")
-        eq_index_end = alarm.find(" ", eq_index)
-        
-        count = count + 1
-        if(fmt_index_end != -1 and eq_index_end != -1) :
-            fmt_str = alarm[fmt_index:fmt_index_end+1]
-            #print fmt_str
-            fmt = fmt_str.split("=")
-            eq_str = alarm[eq_index:eq_index_end]
-            eq = eq_str.split("=")
-            #print eq[1]
-            #print fmt[1]
-            alarm_dict[eq[1]]=fmt[1].strip("\"")
+alarm_dict = {}
+msg_dict = {}
+
+with open('C:/Data/xuc/python/taipei.act') as alarm_file:
+    record = ""
+    for line in alarm_file.readlines():
+        # end of line is \n
+        #print "end of line:(" + line[-2] + ")"
+        if line[-2] == '-':
+            record += line[:-2]
+            #print "record: " + record
         else:
-            print("bad alarm record: %d", count)
-            print alarm
-            bad_act_alarm_count = bad_act_alarm_count + 1
+            #skip the end of line \n
+            record += line[:-1]
+            #print "record:("+record+")"
+            
+            fmt_index = record.find("FMT")
+            fmt_index_end = record.find("\"", fmt_index + 6)
+        
+            eq_index = record.find("ALMA EQ")
+            if eq_index != -1:
+                eq_index_end = record.find(" ", eq_index + 5)
+        
+                count = count + 1
+                if(fmt_index_end != -1 and eq_index_end != -1) :
+                    fmt_str = record[fmt_index:fmt_index_end+1]
+                    print fmt_str
+                    fmt = fmt_str.split("=")
+                    eq_str = record[eq_index+5:eq_index_end]
+                    eq = eq_str.split("=")
+                    print eq[1]
+                    print fmt[1]
+                    alarm_dict[eq[1]]=fmt[1].strip("\"")
+                else:
+                    print("bad alarm record: %d", count)
+                    print record
+                    bad_act_alarm_count = bad_act_alarm_count + 1
+            #else:
+             #   eq_index = record.find("MSG EQ")
+            record = ""       
     
     #print alarm_dict
     print " ACT alarms: ",len(alarm_dict)
@@ -136,8 +153,8 @@ for row in csv.reader(alarm_old):
         else:
             act_value=""
             match_act = "none"
-            print
-            print "<<"+alarm_equate+">>"+" does not have FMT"
+            #print
+            #print "<<"+alarm_equate+">>"+" does not have FMT"
             
         row.insert(2, act_value)
         row.insert(3, match_act )
@@ -151,6 +168,9 @@ print "Text mismatch between ACT and Master List: ", text_mismatch
   
 alarm_old.close()
 alarm_new.close()
+
+import PySide
+ 
 
 #num = 1
 #for keys,values in alarm_dict.items():
